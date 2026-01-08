@@ -1,0 +1,48 @@
+import streamlit as st
+import pandas as pd
+from datetime import datetime
+
+# 1. PERSONEL LİSTESİ (Örnek Liste - İstediğiniz kadar ekleyebiliriz)
+personel_listesi = ["Ahmet Yılmaz", "Mehmet Demir", "Ayşe Kaya", "Caner Uzun", "Selin Bakır"]
+
+# 2. ÜRÜN VERİ TABANI (Barkod, Ürün Adı, Başlangıç Stoğu)
+# Gerçek barkodlarınız geldiğinde bu alanı güncelleyeceğiz
+urunler = {
+    "111222333": {"ad": "Kalem", "stok": 100},
+    "444555666": {"ad": "Hareketli Havlu", "stok": 50},
+    "777888999": {"ad": "Mop", "stok": 20}
+}
+
+st.title("🚀 İdari İşler Akıllı Stok Paneli")
+
+# --- SOL MENÜ ---
+islem = st.sidebar.selectbox("Lütfen İşlem Seçin", ["Barkodla Ürün Çıkışı", "Stok İzleme", "Rapor Sorgulama"])
+
+if islem == "Barkodla Ürün Çıkışı":
+    st.subheader("📦 Ürün Teslimatı")
+    
+    # AKILLI ARAMA KUTUSU: Personel Listesi
+    secilen_personel = st.selectbox("Ürünü Teslim Alan Personel:", [""] + personel_listesi)
+    
+    # BARKOD GİRİŞİ (Kamera entegrasyonu buraya bağlanır)
+    barkod_input = st.text_input("Barkodu Okutun (Kamera Odaklı):")
+    
+    adet = st.number_input("Teslim Edilecek Adet:", min_value=1, value=1)
+
+    if st.button("İşlemi Tamamla"):
+        if barkod_input in urunler and secilen_personel != "":
+            urun_adi = urunler[barkod_input]["ad"]
+            st.success(f"İşlem Onaylandı: {secilen_personel} kişisine {adet} adet {urun_adi} verildi.")
+            # Burada veritabanı (Google Sheets/SQLite) güncelleme kodu çalışır.
+        else:
+            st.error("Lütfen geçerli bir barkod ve personel seçtiğinizden emin olun!")
+
+elif islem == "Stok İzleme":
+    st.subheader("📋 Güncel Depo Durumu")
+    st.table(pd.DataFrame.from_dict(urunler, orient='index'))
+
+elif islem == "Rapor Sorgulama":
+    st.subheader("🔍 Geçmiş Hareket Sorgulama")
+    # Filtreleme Seçenekleri
+    search_query = st.text_input("Personel adına göre filtreleyin:")
+    st.info("Sorgu sonucu aşağıda listelenecektir...")
